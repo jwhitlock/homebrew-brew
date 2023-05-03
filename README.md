@@ -13,7 +13,6 @@ These are personal formulas for [Homebrew](https://brew.sh/).
 To install:
 
 ```sh
-brew tap jwhitlock/brew
 brew install jwhitlock/brew/virtualfish
 vf init compat_aliases auto_activation projects
 ```
