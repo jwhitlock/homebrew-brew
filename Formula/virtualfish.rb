@@ -13,8 +13,8 @@ class Virtualfish < Formula
     regex(%r{href=.*?/packages.*?/virtualfish[._-]v?(\d+(?:\.\d+)*(?:[a-z]\d+)?)\.t}i)
   end
 
-  depends_on "python@3.11"
   depends_on "fish"
+  depends_on "python@3.11"
 
   resource "distlib" do
     url "https://files.pythonhosted.org/packages/58/07/815476ae605bcc5f95c87a62b95e74a1bce0878bc7a3119bc2bf4178f175/distlib-0.3.6.tar.gz"
@@ -53,9 +53,39 @@ class Virtualfish < Formula
 
   def install
     virtualenv_install_with_resources
+    system bin/"vf", "install"
   end
 
   test do
-    system bin/"vf"
+    ENV["VIRTUALFISH_HOME"] = testpath/".virtualenvs"
+    ENV["VIRTUALFISH_PYTHON"] = bin/"python3.11"
+
+    # Pre-create .virtualenvs to avoid interactive prompt
+    (testpath/".virtualenvs").mkpath
+
+    # Run `vf install` in the test environment, adds vf as function
+    refute_path_exists testpath/".config"/"fish"/"conf.d"/"virtualfish-loader.fish"
+    assert_match "VirtualFish is now installed!", shell_output("fish -c '#{bin}/vf install'")
+    assert_path_exists testpath/".config"/"fish"/"conf.d"/"virtualfish-loader.fish"
+
+    # Add virtualenv to prompt so virtualfish doesn't link to prompt doc
+    (testpath/".config"/"fish"/"functions").mkpath
+    (testpath/".config"/"fish"/"functions"/"fish_prompt.fish").write(<<~EOS)
+      function fish_prompt --description 'Test prompt for virtualfish'
+        echo -n -s (pwd) 'VIRTUAL_ENV=' (basename "$VIRTUAL_ENV") '>'
+      end
+    EOS
+
+    # Create a virtualenv 'new_virtualenv'
+    refute_path_exists testpath/".virtualenvs"/"new_virtualenv"/"pyvenv.cfg"
+    system "fish", "-c", "vf new new_virtualenv"
+    assert_path_exists testpath/".virtualenvs"/"new_virtualenv"/"pyvenv.cfg"
+
+    # The virtualenv is listed
+    assert_match "new_virtualenv", shell_output('fish -c "vf ls"')
+
+    # Delete thw virtualenv
+    system "fish", "-c", "vf rm new_virtualenv"
+    refute_path_exists testpath/".virtualenvs"/"new_virtualenv"/"pyvenv.cfg"
   end
 end
