@@ -2,7 +2,7 @@
 
 These are personal formulas for [Homebrew](https://brew.sh/).
 
-## virtualfish
+## virtualfish (merged)
 
 [virtualfish][virtualfish] is a Python virtual environment manager for the
 [fish][fish] shell.
@@ -17,5 +17,7 @@ brew install jwhitlock/brew/virtualfish
 vf init compat_aliases auto_activation projects
 ```
 
-I've submitted as
-[Homebrew/homebrew-core PR 130032](https://github.com/Homebrew/homebrew-core/pull/130032).
+This was submitted May 2, 2023 as
+[Homebrew/homebrew-core PR 130032](https://github.com/Homebrew/homebrew-core/pull/130032)
+and was merged May 13, 2023.
+
